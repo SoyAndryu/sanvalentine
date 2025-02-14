@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Historia con Animaciones</title>
+  <style>
+    @font-face {
+      font-family: 'Starborn';
+      src: url('font/Starborn.ttf') format('truetype');
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+    }
+    #openingGif {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 9999;
+    }
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: url('images/patron.png') repeat;
+      background-size: auto;
+      animation: moveBackground 10s linear infinite;
+    }
+    @keyframes moveBackground {
+      0% { background-position: 0 0; }
+      100% { background-position: 100px 200px; }
+    }
+    .container {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+    .main-text {
+      font-family: 'Starborn', sans-serif;
+      font-size: 4rem;
+      color: #ff4d6d;
+      text-shadow: 3px 3px 0px white;
+      opacity: 0;
+      transform: translateY(50px);
+      animation: slideUpFadeIn 1.5s ease-out forwards;
+    }
+    .sub-text {
+      font-family: Arial, sans-serif;
+      font-size: 1.5rem;
+      color: white;
+      margin-top: 10px;
+      opacity: 0;
+      animation: fadeIn 1.5s ease-in-out forwards 1s;
+    }
+    .button-container {
+      margin-top: 30px;
+      opacity: 0;
+      animation: fadeIn 1.5s ease-in-out forwards 2s;
+    }
+    .choice-button {
+      padding: 15px 30px;
+      font-size: 1.2rem;
+      border-radius: 25px;
+      margin: 0 10px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+    .choice-button:hover {
+      transform: scale(1.5);
+    }
+    .yes-green {
+      background-color: #4CAF50;
+      color: white;
+    }
+    .yes-red {
+      background-color: #ff4d6d;
+      color: white;
+    }
+    .story-container {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 10;
+      overflow-y: auto;
+      padding: 20px;
+      box-sizing: border-box;
+      text-align: center;
+      opacity: 0;
+      transform: scale(0.9);
+      transition: opacity 1s ease, transform 1s ease;
+    }
+    #story:target {
+      display: block;
+      opacity: 1;
+      transform: scale(1);
+    }
+    .love-title {
+      font-family: 'Starborn', sans-serif;
+      font-size: 3rem;
+      color: #ff4d6d;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 0px white;
+      opacity: 0;
+      transform: translateY(-30px);
+      animation: fadeInSlide 1.5s ease forwards 0.8s;
+    }
+    .story-text {
+      font-family: Arial, sans-serif;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      color: white;
+      white-space: pre-line;
+      max-width: 600px;
+      margin: auto;
+      display: block;
+      opacity: 0;
+      transform: translateY(50px);
+      animation: fadeInSlide 1.5s ease forwards 1s;
+    }
+    .us-image {
+      max-width: 100%;
+      height: auto;
+      border-radius: 15px;
+      margin-top: 20px;
+      opacity: 0;
+      transform: translateY(30px);
+      animation: fadeInSlide 1.5s ease forwards 2s;
+    }
+    .close-button {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: white;
+      border: none;
+      font-size: 1.5rem;
+      text-decoration: none;
+      color: black;
+      padding: 5px 10px;
+      border-radius: 50%;
+    }
+    .nugget-img {
+      position: fixed;
+      bottom: 10px;
+      right: 10px;
+      width: 100px;
+      height: 100px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+    .nugget-img:hover {
+      transform: scale(1.5);
+    }
+    .gato-img {
+      position: fixed;
+      bottom: 10px;
+      left: 10px;
+      width: 100px;
+      height: 100px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+    .gato-img:hover {
+      transform: scale(1.5);
+    }
+    @keyframes fadeIn {
+      to { opacity: 1; }
+    }
+    @keyframes fadeInSlide {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    @keyframes slideUpFadeIn {
+      0% {
+        opacity: 0;
+        transform: translateY(50px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Gif de apertura -->
+  <img id="openingGif" src="gifs/abrir.gif" alt="Opening Animation">
+
+  <div class="container">
+    <h1 class="main-text">WILL YOU BE MY VALENTINE?</h1>
+    <p class="sub-text">actually, you don't have a choice :3</p>
+    <div class="button-container">
+      <a href="#story" class="choice-button yes-green">Sí</a>
+      <a href="#story" class="choice-button yes-red">Sí pero rojito</a>
+    </div>
+  </div>
+
+  <img src="images/Nugget.png" alt="Nugget" class="nugget-img" onclick="window.location.href='nugget'">
+  <img src="images/gato.png" alt="Gato" class="gato-img" onclick="window.location.href='gatonto'">
+
+  <!-- Audios -->
+  <audio id="sound1" preload="auto">
+    <source src="sounds/1.wav" type="audio/wav">
+  </audio>
+  <audio id="sound2" preload="auto">
+    <source src="sounds/2.wav" type="audio/wav">
+  </audio>
+  <audio id="sound3" preload="auto">
+    <source src="sounds/3.wav" type="audio/wav">
+  </audio>
+  <audio id="sound4" preload="auto">
+    <source src="sounds/4.wav" type="audio/wav">
+  </audio>
+  <audio id="catSound" preload="auto">
+    <source src="sounds/cat.mp3" type="audio/mp3">
+  </audio>
+  <audio id="nuggetSound" preload="auto">
+    <source src="sounds/nugget.mp3" type="audio/mp3">
+  </audio>
+
+  <div class="story-container" id="story">
+    <a href="#" class="close-button">✖</a>
+    <h2 class="love-title">TE AMO DEMASIADO</h2>
+    <p class="story-text" id="fnafText"></p>
+    <img src="images/Us.png" alt="Us" class="us-image">
+  </div>
+
+  <script>
+    // Manejar el gif de apertura
+    const openingGif = document.getElementById('openingGif');
+    
+    setTimeout(() => {
+      openingGif.style.display = 'none';
+    }, 3000);
+
+    // Función para reproducir un sonido aleatorio
+    function playRandomSound() {
+      const soundNumber = Math.floor(Math.random() * 4) + 1;
+      const sound = document.getElementById(`sound${soundNumber}`);
+      sound.currentTime = 0;
+      sound.play();
+    }
+
+    function showStory() {
+      const storyContainer = document.getElementById('story');
+      const textElement = document.getElementById('fnafText');
+      
+      const text = `Hoy es 14 de febrero, un día especial para muchos, pero para mí, es solo otra excusa perfecta para recordarte cuánto te amo. San Valentín no se trata solo de flores o regalos, sino de celebrar lo que realmente importa: el amor que compartimos, que sigue creciendo sin importar la distancia.
+
+Cada 14 de febrero me hace pensar en lo afortunado que soy de tenerte en mi vida. No hay kilómetros que puedan separarnos cuando nuestros corazones laten juntos. Me encanta cada momento a tu lado, cada conversación, cada sonrisa que me das, porque haces que cualquier día sea especial.
+
+Así que, en este San Valentín, quiero que sepas que mi amor por ti no entiende de fechas, pero hoy, más que nunca, quiero recordarte que eres lo mejor que me ha pasado.
+
+Feliz 14 de febrero, mi amor. Siempre tuyo.`;
+      
+      let i = 0;
+      textElement.innerHTML = "";
+      storyContainer.classList.add('show');
+
+      function typeText() {
+        if (i < text.length) {
+          textElement.innerHTML += text[i];
+          i++;
+          setTimeout(typeText, 50);
+        } else {
+          textElement.style.borderRight = "none";
+        }
+      }
+
+      setTimeout(typeText, 1000);
+    }
+
+    // Obtener y configurar los botones de elección
+    const choiceButtons = document.querySelectorAll('.choice-button');
+    choiceButtons.forEach(button => {
+      button.addEventListener('click', showStory);
+      button.addEventListener('mouseenter', playRandomSound);
+    });
+
+    // Configurar sonidos para gato y nugget
+    const catSound = document.getElementById('catSound');
+    const nuggetSound = document.getElementById('nuggetSound');
+    const catImg = document.querySelector('.gato-img');
+    const nuggetImg = document.querySelector('.nugget-img');
+
+    catImg.addEventListener('mouseenter', () => {
+      catSound.currentTime = 0;
+      catSound.play();
+    });
+
+    nuggetImg.addEventListener('mouseenter', () => {
+      nuggetSound.currentTime = 0;
+      nuggetSound.play();
+    });
+  </script>
+</body>
+</html>

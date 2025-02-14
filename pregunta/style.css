@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pregunta</title>
+    <style>
+        @font-face {
+            font-family: 'Starborn';
+            src: url('font/Starborn.ttf') format('truetype');
+        }
+        body {
+            font-family: 'Starborn', sans-serif;
+            text-align: center;
+            background-color: #000;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        #text-container {
+            font-size: 50px;
+        }
+        .buttons {
+            margin-top: 20px;
+            display: flex;
+            gap: 20px;
+            opacity: 0;
+        }
+        button {
+            font-size: 35px;
+            padding: 15px 30px;
+            cursor: pointer;
+            border: none;
+            background-color: white;
+            color: black;
+            font-weight: bold;
+            position: relative;
+            transform: translateX(-100%);
+            animation: none;
+            transition: transform 0.5s ease-out, background-color 0.3s, transform 0.3s;
+            opacity: 0;
+        }
+        button:nth-child(2) {
+            transform: translateX(100%);
+        }
+        button:hover {
+            transform: scale(1.2);
+        }
+        #yes-btn:hover {
+            background-color: green;
+            color: white;
+        }
+        #no-btn:hover {
+            background-color: red;
+            color: white;
+        }
+        @keyframes slide-in {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Animación para el botón de "Sí" */
+        @keyframes growAndCenter {
+            0% {
+                transform: scale(1) translateX(0);
+            }
+            50% {
+                transform: scale(2) translateX(0);
+            }
+            100% {
+                transform: scale(2) translateX(-50%) translateY(-50%);
+            }
+        }
+
+        .hidden {
+            display: none;
+        }
+        #tonota-text {
+            opacity: 0;
+            transition: opacity 1s ease-in;
+        }
+        #gatonto {
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+    <div id="text-container"></div>
+    <div class="buttons">
+        <button id="yes-btn" onclick="handleYes()">Si</button>
+        <button id="no-btn" onclick="showTonota()">No</button>
+    </div>
+    <div id="tonota-container" class="hidden">
+        <p id="tonota-text" style="font-size: 50px;">Que tonota</p>
+        <img id="gatonto" src="images/gatonto.png" alt="Gatonto">
+    </div>
+    <audio id="vine-sound" src="sounds/vine.mp3"></audio>
+    <audio id="risa-sound" src="sounds/risa.mp3"></audio>
+    
+    <script>
+        const text = "Sabes que dia es hoy, no?";
+        const textContainer = document.getElementById("text-container");
+        let index = 0;
+
+        function typeText() {
+            if (index < text.length) {
+                textContainer.innerHTML += text[index];
+                index++;
+                setTimeout(typeText, 200);
+            } else {
+                setTimeout(() => {
+                    document.querySelector(".buttons").style.opacity = "1";
+                    document.getElementById("yes-btn").style.animation = "slide-in 1.5s ease-out forwards";
+                    document.getElementById("no-btn").style.animation = "slide-in 1.5s ease-out forwards";
+                }, 1500);
+            }
+        }
+
+        function handleYes() {
+            // Animación para hacer crecer y centrar el botón
+            let yesButton = document.getElementById("yes-btn");
+            yesButton.style.animation = "growAndCenter 2s forwards"; // Aplicamos la animación
+
+            // Después de que termine la animación, redirigir
+            setTimeout(() => {
+                window.location.href = "ChapterOne/index.html"; // Redirigir a la subcarpeta "ChapterOne"
+            }, 2000); // Esperamos a que la animación termine antes de redirigir
+        }
+
+        function showTonota() {
+            document.getElementById("text-container").innerHTML = "";
+            document.querySelector(".buttons").classList.add("hidden");
+            setTimeout(() => {
+                document.getElementById("tonota-container").classList.remove("hidden");
+                document.getElementById("tonota-text").style.opacity = "1";
+                let vineAudio = document.getElementById("vine-sound");
+                vineAudio.play(); // El sonido de Vine se reproduce ahora
+                setTimeout(() => {
+                    let risaAudio = document.getElementById("risa-sound");
+                    risaAudio.play(); // El sonido de la risa se reproduce simultáneamente con la imagen
+                    document.getElementById("gatonto").style.opacity = "1";
+                    risaAudio.onended = () => {
+                        setTimeout(() => {
+                            // Redirigir a la página dentro de la carpeta "ChapterOne"
+                            window.location.href = "ChapterOne/index.html"; // Aquí redirige a "ChapterOne/index.html"
+                        }, 500); // El tiempo antes de la redirección
+                    };
+                }, 1000); // Ajustar el tiempo que deseas para que se retrase la risa
+            }, 2500);
+        }
+
+        function resetQuestion() {
+            // Limpiar todo y ocultar la imagen y texto de "gatonto"
+            document.getElementById("tonota-container").classList.add("hidden");
+            document.getElementById("tonota-text").style.opacity = "0";
+            document.getElementById("gatonto").style.opacity = "0";
+            
+            // Limpiar el texto de la pregunta y reestablecer los botones
+            textContainer.innerHTML = "";
+            index = 0;
+            
+            // Asegurarse de que los botones sean visibles sin animaciones
+            document.querySelector(".buttons").style.opacity = "1";
+            document.getElementById("yes-btn").style.animation = "none";
+            document.getElementById("no-btn").style.animation = "none";
+            document.getElementById("yes-btn").style.transform = "translateX(0)";
+            document.getElementById("no-btn").style.transform = "translateX(0)";
+            
+            // Llamar a la función para reescribir el texto de la pregunta
+            typeText();
+        }
+
+        // Iniciar la animación de texto
+        typeText();
+    </script>
+</body>
+</html>

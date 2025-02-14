@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Question</title>
+    <link href="https://fonts.googleapis.com/css2?family=Slackey&family=Annie+Use+Your+Telescope&family=Dela+Gothic+One&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            background-color: black;
+            font-family: 'Starborn', Arial, sans-serif;
+            color: white;
+            overflow: hidden;
+            position: relative;
+        }
+
+        #initial-text {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2;
+            opacity: 0;
+            transition: opacity 1.5s ease;
+            font-family: 'Slackey', cursive;
+            font-size: 3rem;
+            color: white;
+            letter-spacing: 0.5rem;
+        }
+
+        #initial-text span {
+            color: #00BFFF;
+            margin: 0 0.5rem;
+            text-shadow: 0 0 8px #00BFFF, 0 0 12px #00BFFF30;
+            animation: subtle-glow 2s ease-in-out infinite;
+        }
+
+        #button-message-container {
+            position: fixed;
+            top: 15%;
+            left: 0;
+            width: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            z-index: 3;
+            transition: transform 1s ease;
+        }
+
+        #mysterious-button-text {
+            color: white;
+            font-family: 'Dela Gothic One', cursive;
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            opacity: 0;
+            transition: transform 1s ease;
+        }
+
+        #button-subtitle {
+            color: #00BFFF;
+            font-family: 'Annie Use Your Telescope', cursive;
+            font-size: 2rem;
+            opacity: 0;
+            animation: blink-glow 2s infinite;
+            margin-top: -1rem;
+            transition: transform 1s ease;
+        }
+
+        @keyframes buttonZoom {
+            to {
+                transform: translate(-50%, -50%) scale(1.2);
+            }
+        }
+
+        @keyframes textShrink {
+            to {
+                transform: scale(0.8);
+                opacity: 0.8;
+            }
+        }
+
+        #mysterious-button {
+            position: fixed;
+            top: 85%;
+            left: 50%;
+            transform: translate(-50%, 200%);
+            z-index: 3;
+            opacity: 0;
+            cursor: default;
+            display: none;
+            transition: transform 1s ease, opacity 1s ease;
+        }
+
+        #mysterious-button.slide-up {
+            transform: translate(-50%, -50%);
+            opacity: 1;
+        }
+
+        #mysterious-button.zoom-effect {
+            animation: buttonZoom 1s forwards;
+        }
+
+        #mysterious-button-text.shrink-effect,
+        #button-subtitle.shrink-effect {
+            animation: textShrink 1s forwards;
+        }
+
+        #mysterious-button img {
+            max-width: 200px;
+            height: auto;
+        }
+
+        #main-content {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: black;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        #main-content.visible {
+            opacity: 1;
+            z-index: 4;
+        }
+
+        #message {
+            font-size: 32px;
+            margin-bottom: 0;
+            min-height: 36px;
+            text-align: center;
+            display: none;
+        }
+
+        #options {
+            display: none;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .option {
+            padding: 10px 30px;
+            background-color: transparent;
+            color: white;
+            border: 2px solid white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Starborn', Arial, sans-serif;
+            font-size: 20px;
+        }
+
+        .option:hover {
+            transform: scale(1.1);
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        #closingGif {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+            z-index: 9999;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        #image-container {
+            margin-top: 20px;
+            display: none;
+            position: relative;
+            z-index: 4;
+            text-align: center;
+        }
+
+        #image-container img {
+            max-width: 200px;
+        }
+
+        @keyframes subtle-glow {
+            0%, 100% { text-shadow: 0 0 8px #00BFFF, 0 0 12px #00BFFF30; }
+            50% { text-shadow: 0 0 12px #00BFFF, 0 0 16px #00BFFF40; }
+        }
+
+        @keyframes blink-glow {
+            0%, 100% { 
+                text-shadow: 0 0 10px #00BFFF, 0 0 20px #00BFFF, 0 0 30px #00BFFF;
+                opacity: 1;
+            }
+            50% { 
+                text-shadow: 0 0 5px #00BFFF, 0 0 10px #00BFFF, 0 0 15px #00BFFF;
+                opacity: 0.7;
+            }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: scale(3) translate(0, 0); }
+            10%, 30%, 50%, 70%, 90% { transform: scale(3) translate(-2px, -2px); }
+            20%, 40%, 60%, 80% { transform: scale(3) translate(2px, 2px); }
+        }
+
+        @font-face {
+            font-family: 'Starborn';
+            src: url('fonts/Starborn.ttf') format('truetype');
+        }
+
+        .shake {
+            animation: shake 0.5s ease-in-out infinite;
+        }
+
+        .fade-out {
+            opacity: 0.2 !important;
+            filter: blur(2px) !important;
+        }
+
+        .zoom-in {
+            transform: scale(3) !important;
+            z-index: 2 !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="initial-text">
+        An <span>Alex!</span> Gift.
+    </div>
+
+    <div id="mysterious-button">
+        <img src="gifs/boton.gif" alt="Mysterious Button">
+    </div>
+
+    <div id="button-message-container">
+        <div id="mysterious-button-text"></div>
+        <div id="button-subtitle"></div>
+    </div>
+
+    <div id="main-content">
+        <div id="message"></div>
+        <div id="image-container">
+            <img src="images/gatonto.png" alt="Gatonto">
+        </div>
+        <div id="options">
+            <button class="option" onclick="handleOption('si')">si</button>
+            <button class="option" onclick="handleOption('no')">no</button>
+        </div>
+    </div>
+
+    <img id="closingGif" src="gifs/cerrar.gif" alt="Closing Animation">
+
+    <script>
+        const introSound = new Audio('sounds/intro.mp3');
+        const vineSound = new Audio('sounds/vine.mp3');
+        const risaSound = new Audio('sounds/risa.mp3');
+        const ambienteSound = new Audio('sounds/ambiente.mp3');
+        const tecladoSound = new Audio('sounds/teclado.mp3');
+        const tocarSound = new Audio('sounds/tocar.mp3');
+        ambienteSound.volume = 0.25;
+        ambienteSound.loop = true;
+        let isTypingComplete = false;
+
+        const originalMessage = "Sabes que dia es hoy, no?";
+        const messages = [
+            "JAKSF no sabes",
+            "silly!",
+            "JAKSJKJF",
+            "COMO QUE NO",
+            "JAAJA¿SM NO SABEEE"
+        ];
+
+        function typeWriterEffect(element, text, speed, callback) {
+            let i = 0;
+            element.textContent = '';
+            
+            function type() {
+                if (i < text.length) {
+                    element.textContent += text.charAt(i);
+                    const soundClone = tecladoSound.cloneNode();
+                    soundClone.play();
+                    i++;
+                    setTimeout(type, speed);
+                } else if (callback) {
+                    callback();
+                }
+            }
+            type();
+        }
+
+        function showMessage(text, animate = true) {
+            const messageElement = document.getElementById('message');
+            messageElement.style.display = 'block';
+            
+            if (animate) {
+                typeWriterEffect(messageElement, text, 100, () => {
+                    document.getElementById('options').style.display = 'flex';
+                });
+            } else {
+                messageElement.textContent = text;
+                document.getElementById('options').style.display = 'flex';
+            }
+        }
+
+        function handleOption(option) {
+            if (option === 'no') {
+                ambienteSound.pause();
+                document.getElementById('options').style.display = 'none';
+                const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+                showMessage(randomMessage, false);
+                vineSound.play();
+                
+                setTimeout(() => {
+                    document.getElementById('image-container').style.display = 'block';
+                    risaSound.play();
+                    
+                    risaSound.onended = () => {
+                        document.getElementById('image-container').style.display = 'none';
+                        showMessage(originalMessage, false);
+                        document.getElementById('options').style.display = 'flex';
+                        ambienteSound.play();
+                    };
+                }, 500);
+            } else if (option === 'si') {
+                ambienteSound.pause();
+                ambienteSound.currentTime = 0;
+                
+                const messageEl = document.getElementById('message');
+                const noButton = document.querySelector('.option:nth-child(2)');
+                const siButton = document.querySelector('.option:nth-child(1)');
+                
+                messageEl.classList.add('fade-out');
+                noButton.classList.add('fade-out');
+                siButton.classList.add('zoom-in');
+                
+                setTimeout(() => {
+                    siButton.classList.add('shake');
+                    
+                    setTimeout(() => {
+                        const closingGif = document.getElementById('closingGif');
+                        closingGif.style.display = 'block';
+                        requestAnimationFrame(() => {
+                            closingGif.style.opacity = '1';
+                        });
+                        
+                        setTimeout(() => {
+                            window.location.href = 'pregunta/index.html';
+                        }, 1000);
+                    }, 500);
+                }, 2500);
+            }
+        }
+
+        setTimeout(() => {
+            const initialText = document.getElementById('initial-text');
+            initialText.style.opacity = '1';
+            
+            setTimeout(() => {
+                introSound.play();
+            }, 500);
+            
+            setTimeout(() => {
+                const mysteriousButton = document.getElementById('mysterious-button');
+                mysteriousButton.style.display = 'block';
+                requestAnimationFrame(() => {
+                    mysteriousButton.classList.add('slide-up');
+                });
+                ambienteSound.play();
+            }, 2900);
+
+            setTimeout(() => {
+                initialText.style.opacity = '0';
+                
+                setTimeout(() => {
+                    initialText.style.display = 'none';
+                    
+                    setTimeout(() => {
+                        const buttonMessageContainer = document.getElementById('button-message-container');
+                        buttonMessageContainer.style.display = 'flex';
+                        
+                        const mysteriousButtonText = document.getElementById('mysterious-button-text');
+                        mysteriousButtonText.style.opacity = '1';
+                        
+                        typeWriterEffect(mysteriousButtonText, "A mysterious button has appeared", 150, () => {
+                            setTimeout(() => {
+                                const buttonSubtitle = document.getElementById('button-subtitle');
+                                buttonSubtitle.style.opacity = '1';
+                                
+                                typeWriterEffect(buttonSubtitle, "maybe you should press it", 75, () => {
+                                    isTypingComplete = true;
+                                    const mysteriousButton = document.getElementById('mysterious-button');
+                                    mysteriousButton.style.cursor = 'pointer';
+                                    mysteriousButton.classList.add('zoom-effect');
+                                    mysteriousButtonText.classList.add('shrink-effect');
+                                    buttonSubtitle.classList.add('shrink-effect');
+                                });
+                            }, 1500);
+                        });
+                    }, 1000);
+                }, 1000);
+            }, 3000);
+        }, 100);
+
+        document.getElementById('mysterious-button').addEventListener('click', () => {
+            if (!isTypingComplete) return;
+            
+            tocarSound.play();
+            
+            const mysteriousButton = document.getElementById('mysterious-button');
+            const buttonMessageContainer = document.getElementById('button-message-container');
+            
+            mysteriousButton.style.transform = 'translate(-50%, 200%)';
+            mysteriousButton.style.transition = 'transform 1s ease';
+            
+            setTimeout(() => {
+                mysteriousButton.style.display = 'none';
+                
+                const mainContent = document.getElementById('main-content');
+                mainContent.style.display = 'flex';
+                mainContent.classList.add('visible');
+                showMessage(originalMessage, true);
+                
+                buttonMessageContainer.style.transform = 'translateY(-100%)';
+                buttonMessageContainer.style.transition = 'transform 1s ease';
+                
+                setTimeout(() => {
+                    buttonMessageContainer.style.display = 'none';
+                }, 1000);
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Animación de GIF, Audio y Texto</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            overflow: hidden;
+            background-color: black; /* Fondo negro */
+            color: white; /* Color del texto */
+            font-family: 'Courier New', Courier, monospace; /* Estilo de fuente tipo consola */
+            font-size: 30px;
+
+            /* Cambiar el cursor al personalizado */
+            cursor: url('images/mouse.png'), auto; /* Cambia "mouse.png" por el nombre de tu archivo */
+        }
+
+        #gif {
+            width: 400px; /* GIF más grande */
+            position: absolute;
+            bottom: -400px; /* Empuja el GIF fuera de la pantalla al principio */
+            animation: moverGif 10s ease-in-out forwards; /* Animación más lenta */
+        }
+
+        @keyframes moverGif {
+            0% {
+                bottom: -400px; /* Inicia fuera de la pantalla */
+            }
+            100% {
+                bottom: 50%; /* Llega al centro de la pantalla */
+                transform: translateY(50%); /* Ajusta la posición para centrarlo */
+            }
+        }
+
+        #text {
+            position: absolute;
+            top: 20%; /* Coloca el texto más arriba */
+            transform: translateY(-50%);
+            text-align: center;
+            display: none;
+        }
+
+        /* Estilo de los botones Yes y No */
+        .optionButton {
+            position: absolute;
+            top: 85%; /* Coloca los botones más abajo en la pantalla */
+            padding: 15px 40px;
+            font-size: 24px;
+            border: 2px solid white; /* Marco blanco */
+            background-color: transparent; /* Fondo transparente */
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            display: none; /* Inicialmente oculto */
+            animation: shake 0.5s infinite; /* Animación de temblar */
+            font-family: 'Courier New', Courier, monospace; /* Mismo estilo de fuente */
+        }
+
+        /* Animación de temblar */
+        @keyframes shake {
+            0% {
+                transform: translateX(0);
+            }
+            25% {
+                transform: translateX(-10px);
+            }
+            50% {
+                transform: translateX(10px);
+            }
+            75% {
+                transform: translateX(-10px);
+            }
+            100% {
+                transform: translateX(0);
+            }
+        }
+
+        /* Animación de temblor en la pantalla */
+        @keyframes screenShake {
+            0% {
+                transform: translateX(0);
+            }
+            25% {
+                transform: translateX(-10px);
+            }
+            50% {
+                transform: translateX(10px);
+            }
+            75% {
+                transform: translateX(-10px);
+            }
+            100% {
+                transform: translateX(0);
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <img id="gif" src="assets/oh.gif" alt="GIF animado">
+    <div id="text"></div>
+
+    <!-- Reproductor de audio -->
+    <audio id="audio">
+        <source src="sounds/terror.mp3" type="audio/mpeg">
+        Tu navegador no soporta el elemento de audio.
+    </audio>
+
+    <!-- Botones Yes y No -->
+    <button id="yesButton" class="optionButton">Yes</button>
+    <button id="noButton" class="optionButton">No</button>
+
+    <script>
+        // Acceder al contexto de audio y al archivo de audio
+        const audio = document.getElementById('audio');
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const analyser = audioContext.createAnalyser();
+        const distortion = audioContext.createWaveShaper();
+        const gainNode = audioContext.createGain();
+        const sound = new Audio('sounds/sans.mp3'); // Cargar el sonido de Sans
+        const yaySound = new Audio('sounds/yay.mp3'); // Cargar el sonido de yay
+        const sadSound = new Audio('sounds/sad.mp3'); // Cargar el sonido de sad
+
+        // Función para aplicar distorsión al audio
+        function makeDistortionCurve(amount) {
+            let curve = new Float32Array(44100);
+            let deg = Math.PI / 180;
+            for (let i = 0; i < 44100; i++) {
+                let x = i * 2 / 44100 - 1;
+                curve[i] = (3 + amount) * x * 20 * deg / (Math.PI + amount * Math.abs(x));
+            }
+            return curve;
+        }
+
+        // Aplicar distorsión
+        distortion.curve = makeDistortionCurve(400); // Distorsión fuerte
+        distortion.oversample = '4x'; // Más distorsión
+
+        // Crear un filtro para bajar el tono
+        const pitchShifter = audioContext.createBiquadFilter();
+        pitchShifter.type = 'lowpass';
+        pitchShifter.frequency.setValueAtTime(150, audioContext.currentTime); // Frecuencia baja
+
+        // Conectar el filtro de tono
+        distortion.connect(pitchShifter);
+        pitchShifter.connect(gainNode);
+        gainNode.connect(analyser);
+        analyser.connect(audioContext.destination);
+
+        // Configurar el bitrate bajo (emulado mediante un ajuste de gain)
+        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime); // Reduce el volumen
+
+        // Reproducir el audio principal (sin loop)
+        audio.play();
+
+        // Reproducir el sonido de Sans
+        sound.play();
+
+        // Reproducir el GIF
+        window.onload = () => {
+            audio.play();
+            sound.play(); // Reproduce el sonido de Sans
+        };
+
+        // Función para mostrar el texto letra por letra
+        function mostrarTexto() {
+            const texto = "I want to give you a gift. Can I give you a gift?";
+            const textElement = document.getElementById("text");
+            textElement.style.display = "block"; // Muestra el div del texto
+
+            let index = 0;
+
+            // Función que agrega una letra por vez y reproduce el sonido
+            function escribirLetra() {
+                if (index < texto.length) {
+                    textElement.innerHTML += texto.charAt(index);
+                    sound.play(); // Reproducir el sonido justo antes de que aparezca la letra
+                    index++;
+                    setTimeout(escribirLetra, 300); // Retraso más largo entre letras (300ms)
+                } else {
+                    // Una vez que termine de mostrar el texto, mostrar el botón
+                    mostrarBoton();
+                }
+            }
+
+            escribirLetra();
+        }
+
+        // Detectar cuando el GIF ha llegado al centro de la pantalla
+        const gif = document.getElementById("gif");
+        gif.addEventListener('animationend', () => {
+            mostrarTexto(); // Mostrar el texto cuando el GIF termine la animación
+        });
+
+        // Función para mostrar el botón YES
+        function mostrarBoton() {
+            const yesButton = document.getElementById("yesButton");
+            yesButton.style.display = "block"; // Muestra el botón
+        }
+
+        // Función para aplicar distorsión al sonido "yay" y reproducirlo
+        function reproducirYay() {
+            const yayAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const yayGainNode = yayAudioContext.createGain();
+            const yayDistortion = yayAudioContext.createWaveShaper();
+            yayDistortion.curve = makeDistortionCurve(400); // Mucha distorsión
+            yayDistortion.oversample = '4x';
+
+            const yaySource = yayAudioContext.createMediaElementSource(yaySound);
+            yaySource.connect(yayDistortion);
+            yayDistortion.connect(yayGainNode);
+            yayGainNode.connect(yayAudioContext.destination);
+
+            yaySound.play(); // Reproducir sonido de yay
+        }
+
+        // Cuando se haga click en el botón YES
+        const yesButton = document.getElementById("yesButton");
+        yesButton.addEventListener('click', () => {
+            reproducirYay(); // Reproducir el sonido distorsionado
+
+            // Hacer temblar la pantalla
+            document.body.style.animation = "screenShake 0.5s"; // Aplicar la animación de temblor
+            setTimeout(() => {
+                // Ocultar el texto y el botón
+                document.getElementById("text").style.display = "none";
+                document.getElementById("yesButton").style.display = "none";
+                document.getElementById("noButton").style.display = "none";
+                document.body.style.animation = ""; // Quitar la animación de temblor
+
+                // Cambiar el GIF
+                document.getElementById("gif").src = "assets/ohsad.gif";
+                // Reproducir el sonido sad
+                sadSound.play();
+
+                // Mostrar la nueva pregunta
+                mostrarSegundaPregunta();
+            }, 500); // Duración de la animación de temblor
+        });
+
+        // Función para mostrar la segunda pregunta
+        function mostrarSegundaPregunta() {
+            const textElement = document.createElement('div');
+            textElement.id = 'secondText';
+            textElement.innerHTML = "Pero prometes amarme?";
+            document.body.appendChild(textElement);
+            textElement.style.position = 'absolute';
+            textElement.style.top = '20%';
+            textElement.style.transform = 'translateY(-50%)';
+            textElement.style.textAlign = 'center';
+            textElement.style.fontSize = '30px';
+            textElement.style.color = 'white';
+            textElement.style.fontFamily = "'Courier New', Courier, monospace";
+
+            let index = 0;
+            function escribirNuevoTexto() {
+                if (index < textElement.innerHTML.length) {
+                    textElement.innerHTML += textElement.innerHTML.charAt(index);
+                    index++;
+                    setTimeout(escribirNuevoTexto, 300); // Retraso más largo entre letras (300ms)
+                } else {
+                    // Mostrar las opciones de Yes y No
+                    mostrarSegundaOpciones();
+                }
+            }
+
+            escribirNuevoTexto();
+        }
+
+        // Función para mostrar las opciones de la segunda pregunta
+        function mostrarSegundaOpciones() {
+            const yesButton = document.getElementById("yesButton");
+            const noButton = document.getElementById("noButton");
+            yesButton.style.display = "block";
+            noButton.style.display = "block";
+        }
+
+        // Cuando se haga click en el botón No
+        noButton.addEventListener('click', () => {
+            // Cambiar el GIF
+            document.getElementById("gif").src = "assets/ohsad.gif";  // Cambiar al GIF triste
+            sadSound.play();  // Reproducir el sonido de tristeza
+        });
+    </script>
+</body>
+</html>

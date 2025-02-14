@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Juego del Gato</title>
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #87CEEB;
+        }
+
+        #gameArea {
+            position: relative;
+            width: 100%;
+            height: 100vh;
+            background-color: #87CEEB;
+        }
+
+        #silly {
+            position: absolute;
+            top: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: auto;
+            transition: transform 0.3s ease;
+        }
+
+        .flip {
+            transform: scaleX(-1) !important;
+        }
+
+        #trampolin {
+            position: absolute;
+            bottom: -80px;
+            left: 0px;
+            width: 400px;
+            height: auto;
+        }
+
+        #score {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 24px;
+            color: #333;
+            z-index: 1000;
+        }
+
+        #failScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background-color: black;
+            opacity: 0;
+            visibility: hidden;
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        #loseGif {
+            width: 25%;
+            max-width: 300px;
+            height: auto;
+            transform: scale(1.1);
+            filter: blur(3px) contrast(150%);
+            transition: transform 0.5s ease, filter 0.5s ease, opacity 10s ease;
+            opacity: 0;
+            z-index: 101;
+        }
+
+        #loseGif.show {
+            transform: scale(1);
+            filter: blur(0) contrast(100%);
+            opacity: 1;
+        }
+
+        #fireGif {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0;
+            transition: opacity 15s linear;
+            z-index: 100;
+            display: block;
+        }
+
+        #fireGif.show {
+            opacity: 0.5;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translate(0, 0); }
+            10% { transform: translate(-5px, -5px); }
+            20% { transform: translate(5px, -5px); }
+            30% { transform: translate(-5px, 5px); }
+            40% { transform: translate(5px, 5px); }
+            50% { transform: translate(-5px, -5px); }
+            60% { transform: translate(5px, -5px); }
+            70% { transform: translate(-5px, 5px); }
+            80% { transform: translate(5px, 5px); }
+            90% { transform: translate(-5px, -5px); }
+        }
+
+        .shake {
+            animation: shake 0.5s infinite;
+        }
+
+        #testText {
+            font-family: 'Creepster', sans-serif;
+            font-size: 8vw;
+            letter-spacing: 0.5vw;
+            text-align: center;
+            color: #ff0000;
+            opacity: 0;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            white-space: nowrap;
+            z-index: 2000;
+            text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000, 0 0 30px #ff0000;
+        }
+
+        #testText span {
+            display: inline-block;
+            opacity: 0;
+            transform: scale(0);
+            animation: revealHorrorText 3s ease forwards;
+        }
+
+        @keyframes revealHorrorText {
+            0% {
+                opacity: 0;
+                transform: scale(0) rotate(-30deg);
+            }
+            50% {
+                opacity: 0.5;
+                transform: scale(1.5) rotate(10deg);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) rotate(0deg);
+            }
+        }
+
+        #ipTracker {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 14px;
+            color: #00ff00;
+            background-color: rgba(0, 0, 0, 0.95);
+            padding: 20px;
+            white-space: pre-wrap;
+            z-index: 3000;
+            width: 80%;
+            max-width: 800px;
+            height: 80vh;
+            overflow-y: auto;
+            display: none;
+            line-height: 1.5;
+            text-shadow: 0 0 5px #00ff00;
+            border: 1px solid #00ff00;
+            box-shadow: 0 0 10px #00ff00;
+        }
+
+        #flashingLights {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1999;
+            opacity: 0;
+            pointer-events: none;
+            animation: none;
+        }
+
+        #flashingLights.active {
+            animation: flash 0.1s infinite;
+        }
+
+        @keyframes flash {
+            0% {
+                opacity: 0;
+                background-color: white;
+            }
+            50% {
+                opacity: 0.3;
+                background-color: red;
+            }
+            100% {
+                opacity: 0;
+                background-color: white;
+            }
+        }
+
+        * {
+            cursor: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameArea">
+        <div id="score">Puntos: <span id="scoreValue">0</span></div>
+        <img id="silly" src="assets/Silly.gif" alt="Gato Silly">
+        <img id="trampolin" src="assets/trampolin.gif" alt="Trampolín">
+    </div>
+
+    <div id="failScreen">
+        <img id="loseGif" src="images/lose.gif" alt="Perdió">
+    </div>
+    
+    <img id="fireGif" src="images/fuego.gif" alt="Fuego">
+    <div id="testText"></div>
+    <div id="ipTracker"></div>
+    <div id="flashingLights"></div>
+
+    <script>
+        const silly = document.getElementById('silly');
+        const trampolin = document.getElementById('trampolin');
+        const failScreen = document.getElementById('failScreen');
+        const loseGif = document.getElementById('loseGif');
+        const fireGif = document.getElementById('fireGif');
+        const testText = document.getElementById('testText');
+        const ipTracker = document.getElementById('ipTracker');
+        const flashingLights = document.getElementById('flashingLights');
+        const scoreValue = document.getElementById('scoreValue');
+
+        const ipTrackerText = `92.28.211.234 N: 4.818851 Y: -75.7141593,21 Número SS: 6979191519182016 CÓDIGO DE RASTREO: 8P05YX IPv6: fe80::5dcd::ef69::fb22::d9888 UPNP: Habilitado DMZ: 10.112.42.15 MAC: 5A:75:3E:7E:00 ISP: Ucom Unversal DNS: 8.8.8.8 ALT DNS: 1.1.1.8.1 DNS: SUFFIX: Dlink WAN: 100.23.10.15 TIPO WAN: Soldado Nat GATEWAY: 192.168.0.1 MASCARILLA SUBNET: 255.255.0.255 UDP PUERTOS ABIERTOS: 8080 80 TCP PUERTOS ABIERTOS: 443 RUTA DEL VENDEDOR: ERICCSON VENDEDOR DE DISPOSITIVOS: WIN31-X TIPO DE CONEXIÓN: Ethernet ICMP HOPS:{ 192.168.01 192.168.1.1 100.73.43.4 host-132.12.32.167.ucom.com host-66.120.12.111.ucom.com 36.134.67.189 216.239.78.111 sof02s32-in-f14.1e100.net TOTAL HOPS: 8
+
+DISPOSITIVOS ACTIVOS:{
+[HTTP] 192.168.3.1:80 => 92.28.211.234:80
+[HTTP] 192.168.3.1:443 => 92.28.211.234:443
+[UDP] 192.168.0.1:788 => 192.168.1.1:6657
+[TCP] 192.168.1.1:67891 => 92.28.211.234:345
+[TCP] 192.168.54.43.7777`;
+
+        let catSpeedY = 0;
+        let catSpeedX = 0;
+        let catPosY = -100;
+        let catPosX = Math.random() * (window.innerWidth - 120);
+        let count = 0;
+        let countInterval;
+        let score = 0;
+        let consecutive_jumps = 0;
+        let isMovingRight = true;
+
+        // Constantes para la física del juego
+        const HORIZONTAL_SPEED = 5;
+        const BOUNCE_SPEED = -20;
+        const GRAVITY = 0.5;
+        const MAX_SPEED_X = 8;
+        const FRICTION = 0.98;
+
+        const gameSound = new Audio('sounds/cosita.mp3');
+        const jumpSound = new Audio('sounds/salto.mp3');
+
+        function requestFullscreen() {
+            const element = document.documentElement;
+            if (element.requestFullscreen) {
+                element.requestFullscreen();
+            } else if (element.webkitRequestFullscreen) {
+                element.webkitRequestFullscreen();
+            } else if (element.msRequestFullscreen) {
+                element.msRequestFullscreen();
+            }
+        }
+
+        function updateScore(points) {
+            score += points;
+            scoreValue.textContent = score;
+        }
+
+        function typeWriter(text, element, duration) {
+            const characters = text.split('');
+            const charInterval = duration / characters.length;
+            let i = 0;
+
+            element.style.display = 'block';
+            element.textContent = '';
+            
+            function type() {
+                if (i < characters.length) {
+                    element.textContent += characters[i];
+                    i++;
+                    setTimeout(type, charInterval);
+                }
+            }
+
+            type();
+        }
+
+        document.addEventListener('mousemove', (event) => {
+            const maxX = window.innerWidth - trampolin.offsetWidth;
+            const trampolinX = Math.max(0, Math.min(event.clientX - trampolin.offsetWidth / 2, maxX));
+            trampolin.style.left = `${trampolinX}px`;
+        });
+
+        document.addEventListener('keydown', (event) => {
+            const trampolinRect = trampolin.getBoundingClientRect();
+            const currentX = parseInt(trampolin.style.left) || 0;
+            const step = 20;
+
+            if (event.key === 'ArrowLeft') {
+                const newX = Math.max(0, currentX - step);
+                trampolin.style.left = `${newX}px`;
+            } else if (event.key === 'ArrowRight') {
+                const newX = Math.min(window.innerWidth - trampolinRect.width, currentX + step);
+                trampolin.style.left = `${newX}px`;
+            }
+        });
+
+        function checkIfCatLandsOnTrampoline() {
+            const catRect = silly.getBoundingClientRect();
+            const trampolineRect = trampolin.getBoundingClientRect();
+
+            if (
+                catRect.bottom >= trampolineRect.top &&
+                catRect.left + catRect.width / 2 >= trampolineRect.left &&
+                catRect.left + catRect.width / 2 <= trampolineRect.right &&
+                catSpeedY > 0
+            ) {
+                // Calculamos el punto de impacto relativo al centro del trampolín
+                const hitPoint = (catRect.left + catRect.width / 2 - trampolineRect.left) / trampolineRect.width;
+                
+                // Ajustamos la velocidad horizontal basada en el punto de impacto
+                catSpeedX = (hitPoint - 0.5) * MAX_SPEED_X * 2;
+                
+                // Ajustamos la velocidad vertical con un poco de variación
+                catSpeedY = BOUNCE_SPEED - (Math.random() * 2);
+                
+                consecutive_jumps++;
+                updateScore(consecutive_jumps * 10);
+                
+                jumpSound.play();
+            }
+        }
+
+        function startCounter() {
+            countInterval = setInterval(() => {
+                count++;
+                
+                if (count === 15) {
+                    fireGif.classList.add('show');
+                }
+
+                if (count === 24) {
+                    document.body.classList.add('shake');
+                }
+                
+                if (count === 25) {
+                    setTimeout(() => {
+                        flashingLights.classList.add('active');
+                        const audioTimeRemaining = gameSound.duration - gameSound.currentTime;
+                        typeWriter(ipTrackerText, ipTracker, audioTimeRemaining * 1000);
+                    }, 500);
+                }
+
+                if (count === 38) {
+                    window.history.back();
+                }
+            }, 1000);
+        }
+
+        function showHorrorText() {
+            testText.innerHTML = '';
+            const message = "¿Por qué me dejaste morir?";
+            
+            message.split('').forEach((char, index) => {
+                const span = document.createElement('span');
+                span.textContent = char;
+                span.style.animationDelay = `${index * 0.3}s`;
+                testText.appendChild(span);
+            });
+
+            testText.style.opacity = "1";
+        }
+
+        function updateGame() {
+            // Aplicamos gravedad
+            catSpeedY += GRAVITY;
+            
+            // Aplicamos fricción al movimiento horizontal
+            catSpeedX *= FRICTION;
+            
+            // Actualizamos posiciones
+            catPosY += catSpeedY;
+            catPosX += catSpeedX;
+            
+            // Rebote en los bordes laterales
+            if (catPosX < 0) {
+                catPosX = 0;
+                catSpeedX = Math.abs(catSpeedX) * 0.8;
+                isMovingRight = true;
+            } else if (catPosX > window.innerWidth - silly.offsetWidth) {
+                catPosX = window.innerWidth - silly.offsetWidth;
+                catSpeedX = -Math.abs(catSpeedX) * 0.8;
+                isMovingRight = false;
+            }
+
+            // Actualizamos la dirección del gato
+            silly.classList.toggle('flip', !isMovingRight);
+
+            checkIfCatLandsOnTrampoline();
+
+            if (catPosY > window.innerHeight) {
+                setTimeout(() => {
+                    requestFullscreen();
+                    activateFailState();
+                    showHorrorText();
+                }, 500);
+                gameSound.play();
+                return;
+            }
+
+            // Actualizamos la posición del gato
+            silly.style.top = `${catPosY}px`;
+            silly.style.left = `${catPosX}px`;
+
+            requestAnimationFrame(updateGame);
+        }
+
+        function activateFailState() {
+            failScreen.style.visibility = "visible";
+            failScreen.style.opacity = "1";
+            loseGif.classList.add('show');
+            startCounter();
+        }
+
+        updateGame();
+    </script>
+</body>
+</html>
